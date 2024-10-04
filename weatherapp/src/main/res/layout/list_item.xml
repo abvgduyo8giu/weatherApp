@@ -39,7 +39,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/tvTemp"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:backgroundTint="@color/card_bg_col"
