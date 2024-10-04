@@ -13,16 +13,19 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.weatherapp.Adapters.VpAdapter
 import com.example.weatherapp.Adapters.WeatherModel
+import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.R
 import com.example.weatherapp.databinding.ActivityMainBinding
 import com.example.weatherapp.databinding.FragmentMainBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import com.squareup.picasso.Picasso
 import org.json.JSONObject
 
 const val APY_KEY = "8ca9dbea24a84c5aaa245624242109"
@@ -43,6 +46,7 @@ class MainFragment : Fragment() {
 
     private lateinit var pLauncher: ActivityResultLauncher<String>
     private lateinit var binding: FragmentMainBinding
+    private val model: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,8 +61,20 @@ class MainFragment : Fragment() {
         checkPermission()
         init()
         requestWeatherData("Yakutsk")
+        updateCurrentCard()
     }
 
+    private fun updateCurrentCard() = with(binding) {
+        model.liveDataCurrent.observe(viewLifecycleOwner) {
+            val maxMin = "${it.maxTemp}C/${it.minTemp}C"
+            tvData.text = it.time
+            Picasso.get().load("https:" + it.imgUrl).into(imWeather)
+            tvCity.text = it.city
+            tvCurrentTemp.text = it.currentTemp
+            tvCondition.text = it.condition
+            tvMaxMinTemp.text = maxMin
+        }
+    }
     private fun init() = with(binding) {
         val adapter = VpAdapter(activity as FragmentActivity, fList)
         vp.adapter = adapter
@@ -111,6 +127,7 @@ class MainFragment : Fragment() {
             mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
             weatherItem.hours
         )
+        model.liveDataCurrent.value = item
         Log.d("MyLog", "Res: ${item.maxTemp}")
         Log.d("MyLog", "Res: ${item.minTemp}")
 
